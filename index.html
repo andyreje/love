@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>问答与信件展示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .question {
+            margin-bottom: 15px;
+        }
+        .letter {
+            display: none;
+            background: url('https://www.publicdomainpictures.net/pictures/280000/velka/old-paper-background-15498327271bO.jpg') no-repeat center center;
+            background-size: cover;
+            padding: 20px;
+            text-align: left;
+            border-radius: 8px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            border: none;
+            background: #007BFF;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="quizContainer">
+        <div class="question" id="q1">
+            <p>1. 太阳从哪个方向升起？</p>
+            <button onclick="answerQuestion(1, 'east')">东</button>
+            <button onclick="answerQuestion(1, 'west')">西</button>
+        </div>
+        <div class="question" id="q2" style="display: none;">
+            <p>2. 一年有多少个月？</p>
+            <button onclick="answerQuestion(2, '12')">12</button>
+            <button onclick="answerQuestion(2, '10')">10</button>
+        </div>
+        <div class="question" id="q3" style="display: none;">
+            <p>3. 请输入你的名字：</p>
+            <input type="text" id="nameInput">
+            <button onclick="answerQuestion(3)">提交</button>
+        </div>
+    </div>
+    <div class="container letter" id="letter">
+        <h2>一封信</h2>
+        <p id="letterText">亲爱的朋友，<br><br>感谢你参与这次问答。愿你的每一天都充满阳光和希望！<br><br>祝好，<br>ChatGPT</p>
+    </div>
+    <script>
+        let currentQuestion = 1;
+        function answerQuestion(qNum, answer) {
+            if (qNum === 3) {
+                const name = document.getElementById('nameInput').value;
+                if (name.trim() === '') {
+                    alert('请输入你的名字');
+                    return;
+                }
+                document.getElementById('letterText').innerHTML = `亲爱的 ${name}，<br><br>感谢你参与这次问答。愿你的每一天都充满阳光和希望！<br><br>祝好，<br>ChatGPT`;
+            }
+            document.getElementById(`q${qNum}`).style.display = 'none';
+            currentQuestion++;
+            if (currentQuestion <= 3) {
+                document.getElementById(`q${currentQuestion}`).style.display = 'block';
+            } else {
+                document.getElementById('letter').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
