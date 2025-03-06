@@ -5,45 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>问答与信件展示</title>
     <style>
+        /* 通用样式 */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background: linear-gradient(135deg, #ece9e6, #ffffff);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
+            min-height: 100vh;
         }
         .container {
             width: 90%;
             max-width: 400px;
-            background: white;
+            background: #fff;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin: 10px;
         }
         .question {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
+        .question p {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            border: none;
+            background: #007BFF;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 8px 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        /* 信件样式 */
         .letter {
             display: none;
             background: url('https://www.publicdomainpictures.net/pictures/280000/velka/old-paper-background-15498327271bO.jpg') no-repeat center center;
             background-size: cover;
-            padding: 20px;
+            padding: 30px;
             text-align: left;
             border-radius: 8px;
-        }
-        button {
-            margin-top: 10px;
-            padding: 10px;
-            border: none;
-            background: #007BFF;
-            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            color: #333;
             font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
+            line-height: 1.6;
+        }
+        .letter h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 22px;
+            color: #6a4f4b;
         }
     </style>
 </head>
@@ -61,33 +90,53 @@
         </div>
         <div class="question" id="q3" style="display: none;">
             <p>3. 请输入你的名字：</p>
-            <input type="text" id="nameInput">
+            <input type="text" id="nameInput" placeholder="你的名字">
             <button onclick="answerQuestion(3)">提交</button>
         </div>
     </div>
     <div class="container letter" id="letter">
         <h2>一封信</h2>
-        <p id="letterText">亲爱的朋友，<br><br>感谢你参与这次问答。愿你的每一天都充满阳光和希望！<br><br>祝好，<br>ChatGPT</p>
+        <p id="letterText">
+            亲爱的朋友，<br><br>
+            感谢你参与这次问答。愿你的每一天都充满阳光和希望！<br><br>
+            祝好，<br>
+            ChatGPT
+        </p>
     </div>
     <script>
         let currentQuestion = 1;
         function answerQuestion(qNum, answer) {
+            // 隐藏当前问题区域
+            const currentElem = document.getElementById('q' + qNum);
+            if (currentElem) {
+                currentElem.style.display = 'none';
+            }
+            // 如果是第3题，则处理输入逻辑
             if (qNum === 3) {
                 const name = document.getElementById('nameInput').value;
                 if (name.trim() === '') {
                     alert('请输入你的名字');
+                    // 重新显示当前题目
+                    currentElem.style.display = 'block';
                     return;
                 }
-                document.getElementById('letterText').innerHTML = `亲爱的 ${name}，<br><br>感谢你参与这次问答。愿你的每一天都充满阳光和希望！<br><br>祝好，<br>ChatGPT`;
+                document.getElementById('letterText').innerHTML = 
+                    `亲爱的 ${name}，<br><br>感谢你参与这次问答。愿你的每一天都充满阳光和希望！<br><br>祝好，<br>ChatGPT`;
             }
-            document.getElementById(`q${qNum}`).style.display = 'none';
             currentQuestion++;
+            // 显示下一个问题或信件
             if (currentQuestion <= 3) {
-                document.getElementById(`q${currentQuestion}`).style.display = 'block';
+                const nextElem = document.getElementById('q' + currentQuestion);
+                if (nextElem) {
+                    nextElem.style.display = 'block';
+                }
             } else {
+                // 隐藏问答区域，显示信件区域
+                document.getElementById('quizContainer').style.display = 'none';
                 document.getElementById('letter').style.display = 'block';
             }
         }
     </script>
 </body>
 </html>
+
