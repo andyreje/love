@@ -5,16 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>问答与信件展示</title>
     <style>
-        /* 通用样式 */
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #ece9e6, #ffffff);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh;
+            background: linear-gradient(135deg, #ece9e6, #ffffff);
+            overflow: hidden;
+        }
+        .hearts {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
         }
         .container {
             width: 90%;
@@ -26,117 +32,114 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             margin: 10px;
         }
-        .question {
-            margin-bottom: 20px;
-        }
-        .question p {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-        button {
-            margin: 5px;
-            padding: 10px 15px;
-            border: none;
+        .progress-bar {
+            height: 5px;
             background: #007BFF;
-            color: #fff;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
+            width: 100%;
+            transition: width 1s linear;
         }
-        button:hover {
-            background: #0056b3;
-        }
-        input[type="text"] {
-            width: calc(100% - 20px);
-            padding: 8px 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        /* 信件样式 */
         .letter {
             display: none;
-            background: url('https://www.publicdomainpictures.net/pictures/280000/velka/old-paper-background-15498327271bO.jpg') no-repeat center center;
-            background-size: cover;
-            padding: 30px;
-            text-align: left;
+            background: #f8e8d8;
+            padding: 20px;
+            text-align: center;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            color: #333;
-            font-size: 16px;
-            line-height: 1.6;
+            font-size: 24px;
+            animation: fadeIn 2s ease-in-out;
         }
-        .letter h2 {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 22px;
-            color: #6a4f4b;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .heart-break {
+            animation: heartBreak 0.5s ease-in-out;
+        }
+        @keyframes heartBreak {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(0.8); opacity: 0; }
         }
     </style>
 </head>
 <body>
+    <div class="hearts" id="hearts">❤️❤️❤️</div>
     <div class="container" id="quizContainer">
+        <div class="progress-bar" id="progressBar"></div>
         <div class="question" id="q1">
             <p>1. 太阳从哪个方向升起？</p>
             <button onclick="answerQuestion(1, 'east')">东</button>
             <button onclick="answerQuestion(1, 'west')">西</button>
+            <button onclick="answerQuestion(1, 'north')">北</button>
+            <button onclick="answerQuestion(1, 'south')">南</button>
         </div>
         <div class="question" id="q2" style="display: none;">
             <p>2. 一年有多少个月？</p>
             <button onclick="answerQuestion(2, '12')">12</button>
             <button onclick="answerQuestion(2, '10')">10</button>
-        </div>
-        <div class="question" id="q3" style="display: none;">
-            <p>3. 请输入你的名字：</p>
-            <input type="text" id="nameInput" placeholder="你的名字">
-            <button onclick="answerQuestion(3)">提交</button>
+            <button onclick="answerQuestion(2, '11')">11</button>
+            <button onclick="answerQuestion(2, '13')">13</button>
         </div>
     </div>
-    <div class="container letter" id="letter">
-        <h2>一封信</h2>
-        <p id="letterText">
-            亲爱的朋友，<br><br>
-            感谢你参与这次问答。愿你的每一天都充满阳光和希望！<br><br>
-            祝好，<br>
-            ChatGPT
-        </p>
+    <div class="container letter" id="letter" style="display: none;">
+        <p id="letterText">这封信不是给你看的。</p>
     </div>
     <script>
         let currentQuestion = 1;
+        let hearts = 3;
+        let timer;
+        let timeLeft = 60;
+        
+        function startTimer() {
+            let progressBar = document.getElementById('progressBar');
+            progressBar.style.width = '100%';
+            timeLeft = 60;
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                progressBar.style.width = (timeLeft / 60) * 100 + '%';
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    loseHeart();
+                    startTimer(); // 倒计时结束后重新启动
+                }
+            }, 1000);
+        }
+
         function answerQuestion(qNum, answer) {
-            // 隐藏当前问题区域
-            const currentElem = document.getElementById('q' + qNum);
-            if (currentElem) {
-                currentElem.style.display = 'none';
+            let correctAnswers = { 1: 'east', 2: '12' };
+            if (answer !== correctAnswers[qNum]) {
+                loseHeart();
+                return;
             }
-            // 如果是第3题，则处理输入逻辑
-            if (qNum === 3) {
-                const name = document.getElementById('nameInput').value;
-                if (name.trim() === '') {
-                    alert('请输入你的名字');
-                    // 重新显示当前题目
-                    currentElem.style.display = 'block';
-                    return;
-                }
-                document.getElementById('letterText').innerHTML = 
-                    `亲爱的 ${name}，<br><br>感谢你参与这次问答。愿你的每一天都充满阳光和希望！<br><br>祝好，<br>ChatGPT`;
-            }
+            document.getElementById('q' + qNum).style.display = 'none';
             currentQuestion++;
-            // 显示下一个问题或信件
-            if (currentQuestion <= 3) {
-                const nextElem = document.getElementById('q' + currentQuestion);
-                if (nextElem) {
-                    nextElem.style.display = 'block';
-                }
+            let nextElem = document.getElementById('q' + currentQuestion);
+            if (nextElem) {
+                nextElem.style.display = 'block';
+                startTimer();
             } else {
-                // 隐藏问答区域，显示信件区域
                 document.getElementById('quizContainer').style.display = 'none';
                 document.getElementById('letter').style.display = 'block';
             }
         }
+
+        function loseHeart() {
+            hearts--;
+            let heartElem = document.getElementById('hearts');
+            heartElem.innerHTML = '❤️'.repeat(hearts);
+            heartElem.classList.add('heart-break');
+            setTimeout(() => heartElem.classList.remove('heart-break'), 500);
+            if (hearts <= 0) {
+                clearInterval(timer);
+                document.getElementById('quizContainer').style.display = 'none';
+                let letter = document.getElementById('letter');
+                letter.style.display = 'block';
+                document.getElementById('letterText').innerHTML = '这封信不是给你看的。';
+            }
+        }
+        
+        startTimer();
     </script>
 </body>
 </html>
-
