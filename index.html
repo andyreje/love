@@ -135,7 +135,12 @@
     <span class="heart">❤️</span>
     <span class="heart">❤️</span>
   </div>
-  <div class="container" id="quizContainer">
+  <!-- 倒计时容器 -->
+  <div class="container" id="countdownContainer" style="display:none;">
+    <p id="countdownText">等待答题开始...</p>
+  </div>
+  <!-- 问答容器 -->
+  <div class="container" id="quizContainer" style="display:none;">
     <div class="progress-bar" id="progressBar"></div>
     <div class="question active" id="q1">
       <p>1. 王晨西最常叫钟宇杰什么？</p>
@@ -183,17 +188,61 @@
     </div>
   </div>
   <div class="container letter" id="letter">
+    <h2>情书</h2>
     <p id="letterText">这封信不是给你看的。</p>
   </div>
   <script>
     let currentQuestion = 1;
     let hearts = 3;
     let timer;
-    const totalTime = 30; // 总时间（秒）
+    const totalTime = 30; // 每题倒计时秒数
     let timeLeft = totalTime;
 
-    // 初始化进度条和第一个问题
-    function init() {
+    // 目标开始答题时间：当前年份的3月9日凌晨1点
+    let currentYear = new Date().getFullYear();
+    let targetTime = new Date(currentYear, 2, 9, 0, 0, 0); // 注意：月份从0开始，2代表3月
+
+    // 初始化时先检查是否达到答题开始时间
+    function checkStartTime() {
+      let now = new Date();
+      if (now >= targetTime) {
+        // 已到答题时间，直接启动问答
+        initQuiz();
+      } else {
+        // 显示倒计时容器
+        document.getElementById('countdownContainer').style.display = 'block';
+        updateCountdown();
+        let countdownTimer = setInterval(() => {
+          updateCountdown();
+          if (new Date() >= targetTime) {
+            clearInterval(countdownTimer);
+            // 隐藏倒计时，启动问答
+            document.getElementById('countdownContainer').style.display = 'none';
+            initQuiz();
+          }
+        }, 1000);
+      }
+    }
+
+    // 更新倒计时显示
+    function updateCountdown() {
+      let now = new Date();
+      let diff = targetTime - now; // 毫秒
+      let seconds = Math.floor((diff / 1000) % 60);
+      let minutes = Math.floor((diff / (1000 * 60)) % 60);
+      let hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      let countdownText = "信封将在 ";
+      if (days > 0) {
+        countdownText += days + " 天 ";
+      }
+      countdownText += hours + " 小时 " + minutes + " 分钟 " + seconds + " 秒 后送到";
+      document.getElementById('countdownText').innerHTML = countdownText;
+    }
+
+    // 初始化问答
+    function initQuiz() {
+      document.getElementById('quizContainer').style.display = 'block';
       document.getElementById('progressBar').style.width = '100%';
       document.getElementById('q1').classList.add('active');
       startTimer();
@@ -284,21 +333,20 @@
       document.getElementById('quizContainer').style.display = 'none';
       const letterText = document.getElementById('letterText');
       if (isWin) {
-        // 请将下面的情书内容替换为你的情书文本
-        letterText.innerHTML = "祝你生日快乐，宝贝！<br><br>" +
-          "在此对你献上诚挚的祝福。<br>" +
-          "我们已经在一起八百多天了，时间过得如此之快，似乎第一次接吻还在昨天。<br><br>" +
-          "因为有你，幸福一直包围着我。<br>" +
-          "去年也是度过了开心的一年。希望我们能永远快乐，永远幸福。<br><br>" +
-          "希望能永远和你在一起。再次祝我的宝贝生日快乐！<br>";
+        letterText.innerHTML = "亲爱的：<br><br>" +
+          "当我在万千星河中寻觅，终究发现最闪亮的，<br>" +
+          "是你温柔的目光和独一无二的微笑。<br><br>" +
+          "无论前路多么崎岖，我都愿与你携手同行，<br>" +
+          "用爱与勇气点亮每一个未来的晨曦。<br><br>" +
+          "永远爱你的，<br>";
       } else {
         letterText.innerHTML = "这封信不是给你看的。";
       }
       document.getElementById('letter').style.display = 'block';
     }
 
-    // 初始化
-    init();
+    // 开始前先检查是否到达答题开始时间
+    checkStartTime();
   </script>
 </body>
 </html>
