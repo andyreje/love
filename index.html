@@ -1,145 +1,305 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>问答与信件展示</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #ece9e6, #ffffff);
-            overflow: hidden;
-        }
-        .hearts {
-            font-size: 24px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .container {
-            width: 90%;
-            max-width: 400px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin: 10px;
-        }
-        .progress-bar {
-            height: 5px;
-            background: #007BFF;
-            width: 100%;
-            transition: width 1s linear;
-        }
-        .letter {
-            display: none;
-            background: #f8e8d8;
-            padding: 20px;
-            text-align: center;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            font-size: 24px;
-            animation: fadeIn 2s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .heart-break {
-            animation: heartBreak 0.5s ease-in-out;
-        }
-        @keyframes heartBreak {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.5; }
-            100% { transform: scale(0.8); opacity: 0; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>问答与情书展示</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #ece9e6, #ffffff);
+    }
+    .container {
+      width: 90%;
+      max-width: 400px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin: 10px;
+    }
+    .progress-bar {
+      height: 5px;
+      background: #007BFF;
+      width: 100%;
+      transition: width 0.1s linear;
+      margin-bottom: 20px;
+    }
+    .hearts {
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: center;
+    }
+    .heart {
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .heart.fade-out {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    .letter {
+      display: none;
+      background: #f8e8d8;
+      padding: 20px;
+      text-align: left;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .question {
+      display: none;
+    }
+    .question.active {
+      display: block;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background: #007BFF;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #005bb5;
+    }
+    .shake {
+      animation: shake 0.5s;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-10px); }
+      100% { transform: translateX(0); }
+    }
+    .question img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    .image-option {
+      display: inline-block;
+      margin: 5px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+    }
+    .image-option:hover {
+      border-color: #007BFF;
+    }
+    .image-option img {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+    }
+    /* 针对手机屏幕的优化 */
+    @media (max-width: 600px) {
+      .container {
+        width: 95%;
+        padding: 15px;
+      }
+      .hearts {
+        font-size: 28px;
+      }
+      button {
+        padding: 12px 24px;
+        font-size: 18px;
+      }
+      .progress-bar {
+        margin-bottom: 15px;
+      }
+      .letter {
+        font-size: 18px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="hearts" id="hearts">❤️❤️❤️</div>
-    <div class="container" id="quizContainer">
-        <div class="progress-bar" id="progressBar"></div>
-        <div class="question" id="q1">
-            <p>1. 太阳从哪个方向升起？</p>
-            <button onclick="answerQuestion(1, 'east')">东</button>
-            <button onclick="answerQuestion(1, 'west')">西</button>
-            <button onclick="answerQuestion(1, 'north')">北</button>
-            <button onclick="answerQuestion(1, 'south')">南</button>
-        </div>
-        <div class="question" id="q2" style="display: none;">
-            <p>2. 一年有多少个月？</p>
-            <button onclick="answerQuestion(2, '12')">12</button>
-            <button onclick="answerQuestion(2, '10')">10</button>
-            <button onclick="answerQuestion(2, '11')">11</button>
-            <button onclick="answerQuestion(2, '13')">13</button>
-        </div>
+  <div class="hearts" id="hearts">
+    <span class="heart">❤️</span>
+    <span class="heart">❤️</span>
+    <span class="heart">❤️</span>
+  </div>
+  <div class="container" id="quizContainer">
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="question active" id="q1">
+      <p>1. 王晨西最常叫钟宇杰什么？</p>
+      <button onclick="answerQuestion(1, 'east')">小钟</button>
+      <button onclick="answerQuestion(1, 'west')">小杰</button>
+      <button onclick="answerQuestion(1, 'north')">小杰杰</button>
+      <button onclick="answerQuestion(1, 'south')">宇杰</button>
     </div>
-    <div class="container letter" id="letter" style="display: none;">
-        <p id="letterText">这封信不是给你看的。</p>
+    <div class="question" id="q2">
+      <p>2. 你男朋友的生日？</p>
+      <button onclick="answerQuestion(2, '12')">2月3号</button>
+      <button onclick="answerQuestion(2, '10')">10月6号</button>
+      <button onclick="answerQuestion(2, '11')">7月8号</button>
+      <button onclick="answerQuestion(2, '13')">2月19号</button>
     </div>
-    <script>
-        let currentQuestion = 1;
-        let hearts = 3;
-        let timer;
-        let timeLeft = 60;
-        
-        function startTimer() {
-            let progressBar = document.getElementById('progressBar');
-            progressBar.style.width = '100%';
-            timeLeft = 60;
-            clearInterval(timer);
-            timer = setInterval(() => {
-                timeLeft--;
-                progressBar.style.width = (timeLeft / 60) * 100 + '%';
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    loseHeart();
-                    startTimer(); // 倒计时结束后重新启动
-                }
-            }, 1000);
-        }
+    <div class="question" id="q3">
+      <p>3. 这张图片实在哪里拍的？</p>
+      <img src="city.jpg" alt="城市图片">
+      <button onclick="answerQuestion(3, 'beijing')">厦门</button>
+      <button onclick="answerQuestion(3, 'shanghai')">梧州</button>
+      <button onclick="answerQuestion(3, 'guangzhou')">赣州</button>
+      <button onclick="answerQuestion(3, 'shenzhen')">广西</button>
+    </div>
+    <div class="question" id="q4">
+      <p>4. 下面那把武器是王晨西最喜欢使用的？</p>
+      <div class="image-option" onclick="answerQuestion(4, 'h2o')">
+        <img src="h2o.jpg" alt="H₂O">
+      </div>
+      <div class="image-option" onclick="answerQuestion(4, 'co2')">
+        <img src="co2.jpg" alt="CO₂">
+      </div>
+      <div class="image-option" onclick="answerQuestion(4, 'o2')">
+        <img src="o2.jpg" alt="O₂">
+      </div>
+      <div class="image-option" onclick="answerQuestion(4, 'h2')">
+        <img src="h2.jpg" alt="H₂">
+      </div>
+    </div>
+    <div class="question" id="q5">
+      <p>5. 钟宇杰最爱吃的菜？</p>
+      <button onclick="answerQuestion(5, 'jupiter')">辣子鸡</button>
+      <button onclick="answerQuestion(5, 'earth')">小炒黄牛肉</button>
+      <button onclick="answerQuestion(5, 'mars')">豉油鸡</button>
+      <button onclick="answerQuestion(5, 'venus')">口水鸡</button>
+    </div>
+  </div>
+  <div class="container letter" id="letter">
+    <h2>情书</h2>
+    <p id="letterText">这封信不是给你看的。</p>
+  </div>
+  <script>
+    let currentQuestion = 1;
+    let hearts = 3;
+    let timer;
+    const totalTime = 30; // 总时间（秒）
+    let timeLeft = totalTime;
 
-        function answerQuestion(qNum, answer) {
-            let correctAnswers = { 1: 'east', 2: '12' };
-            if (answer !== correctAnswers[qNum]) {
-                loseHeart();
-                return;
-            }
-            document.getElementById('q' + qNum).style.display = 'none';
-            currentQuestion++;
-            let nextElem = document.getElementById('q' + currentQuestion);
-            if (nextElem) {
-                nextElem.style.display = 'block';
-                startTimer();
-            } else {
-                document.getElementById('quizContainer').style.display = 'none';
-                document.getElementById('letter').style.display = 'block';
-            }
-        }
+    // 初始化进度条和第一个问题
+    function init() {
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('q1').classList.add('active');
+      startTimer();
+    }
 
-        function loseHeart() {
-            hearts--;
-            let heartElem = document.getElementById('hearts');
-            heartElem.innerHTML = '❤️'.repeat(hearts);
-            heartElem.classList.add('heart-break');
-            setTimeout(() => heartElem.classList.remove('heart-break'), 500);
-            if (hearts <= 0) {
-                clearInterval(timer);
-                document.getElementById('quizContainer').style.display = 'none';
-                let letter = document.getElementById('letter');
-                letter.style.display = 'block';
-                document.getElementById('letterText').innerHTML = '这封信不是给你看的。';
-            }
+    // 启动倒计时
+    function startTimer() {
+      timer = setInterval(() => {
+        timeLeft--;
+        updateProgressBar();
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          loseHeart();
         }
-        
-        startTimer();
-    </script>
+      }, 1000);
+    }
+
+    // 更新进度条
+    function updateProgressBar() {
+      const progressBar = document.getElementById('progressBar');
+      const width = (timeLeft / totalTime) * 100;
+      progressBar.style.width = width + '%';
+    }
+
+    // 重置倒计时
+    function resetTimer() {
+      clearInterval(timer);
+      timeLeft = totalTime;
+      updateProgressBar();
+      startTimer();
+    }
+
+    // 回答问题
+    function answerQuestion(qNum, answer) {
+      const correctAnswers = {
+        1: 'north',
+        2: '13',
+        3: 'shanghai',
+        4: 'co2',
+        5: 'venus'
+      };
+      if (answer !== correctAnswers[qNum]) {
+        showErrorEffect();
+        loseHeart();
+        return;
+      }
+      document.getElementById('q' + qNum).classList.remove('active');
+      currentQuestion++;
+      const nextElem = document.getElementById('q' + currentQuestion);
+      if (nextElem) {
+        nextElem.classList.add('active');
+        resetTimer();
+      } else {
+        endGame(true);
+      }
+    }
+
+    // 显示答错效果
+    function showErrorEffect() {
+      const quizContainer = document.getElementById('quizContainer');
+      quizContainer.classList.add('shake');
+      setTimeout(() => {
+        quizContainer.classList.remove('shake');
+      }, 500);
+    }
+
+    // 扣减生命值
+    function loseHeart() {
+      const heartElements = document.querySelectorAll('.heart');
+      if (hearts > 0) {
+        const currentHeart = heartElements[hearts - 1];
+        currentHeart.classList.add('fade-out');
+        setTimeout(() => {
+          currentHeart.style.display = 'none';
+          hearts--;
+          if (hearts <= 0) {
+            endGame(false);
+          } else {
+            resetTimer();
+          }
+        }, 500);
+      }
+    }
+
+    // 结束游戏并展示情书
+    function endGame(isWin) {
+      clearInterval(timer);
+      document.getElementById('quizContainer').style.display = 'none';
+      const letterText = document.getElementById('letterText');
+      if (isWin) {
+        // 请将下面的情书内容替换为你的情书文本
+        letterText.innerHTML = "亲爱的：<br><br>" +
+          "当我在万千星河中寻觅，终究发现最闪亮的，<br>" +
+          "是你温柔的目光和独一无二的微笑。<br><br>" +
+          "无论前路多么崎岖，我都愿与你携手同行，<br>" +
+          "用爱与勇气点亮每一个未来的晨曦。<br><br>" +
+          "永远爱你的，<br>XXX";
+      } else {
+        letterText.innerHTML = "这封信不是给你看的。";
+      }
+      document.getElementById('letter').style.display = 'block';
+    }
+
+    // 初始化
+    init();
+  </script>
 </body>
 </html>
